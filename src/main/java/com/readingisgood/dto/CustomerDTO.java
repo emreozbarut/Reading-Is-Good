@@ -15,7 +15,9 @@ public class CustomerDTO {
     private String status;
     private String name;
     private String surname;
+    private String username;
     private String email;
+    private List<String> roles;
     private List<OrderDTO> orders;
     private Date createdDate;
     private Date modifiedDate;

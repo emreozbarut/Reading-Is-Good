@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface CustomerDao extends JpaRepository<Customer, Long> {
-    public Optional<Customer> findByName(String name);
+    Optional<Customer> findByName(String name);
+    Optional<Customer> findByUsername(String username);
 }

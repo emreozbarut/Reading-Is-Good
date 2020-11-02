@@ -8,10 +8,18 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Data
 @Entity
@@ -19,43 +27,79 @@ import java.util.List;
 @Table(name = "CUSTOMER")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Customer {
+public class Customer implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @NotEmpty
     private boolean deleted;
 
     @Enumerated(EnumType.STRING)
     private BaseStatus status = BaseStatus.Active;
 
-    @Column
+    @NotEmpty
     private String name;
 
-    @Column
+    @NotEmpty
     private String surname;
 
-    @Column
+    @NotEmpty
+    private String username;
+
+    @NotEmpty
     private String email;
 
-    @Column
+    @NotEmpty
     private String password;
 
     @Where(clause = "deleted = 0")
     @OneToMany(mappedBy = "customer")
     private List<Orders> orders;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "customer_role",
-            joinColumns = @JoinColumn(name = "customer_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private List<Role> roles;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<String> roles = new ArrayList<>();
 
     @CreationTimestamp
     private Date createdDate;
 
     @UpdateTimestamp
     private Date modifiedDate;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream().map(SimpleGrantedAuthority::new).collect(toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return BaseStatus.Active.equals(this.status);
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return BaseStatus.Active.equals(this.status);
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return BaseStatus.Active.equals(this.status);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return BaseStatus.Active.equals(this.status);
+    }
 }

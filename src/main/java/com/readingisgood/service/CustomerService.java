@@ -1,5 +1,6 @@
 package com.readingisgood.service;
 
+import com.readingisgood.configuration.security.jwt.JwtTokenProvider;
 import com.readingisgood.converter.customer.CustomerDTOConverter;
 import com.readingisgood.dao.CustomerDao;
 import com.readingisgood.dto.CustomerDTO;
@@ -19,6 +20,9 @@ public class CustomerService {
     @Autowired
     private CustomerDTOConverter converter;
 
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     private CustomerDao customerDao;
 
     public CustomerService(CustomerDao customerDao) {
@@ -34,15 +38,23 @@ public class CustomerService {
     }
 
     private RegisterCustomerResponse saveCustomer(Customer customer) {
+        RegisterCustomerResponse response = RegisterCustomerResponse.builder().build();
         try {
             customerDao.save(customer);
+            response.setBearerToken(jwtTokenProvider.createToken(customer.getUsername(), customer.getRoles()));
         } catch (Exception e) {
-            return RegisterCustomerResponse.builder().status(HttpStatus.BAD_REQUEST).build();
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            return response;
         }
-        return RegisterCustomerResponse.builder().status(HttpStatus.CREATED).build();
+        response.setStatus(HttpStatus.CREATED);
+        return response;
     }
 
     public Optional<Customer> findById(Long customerId) {
         return customerDao.findById(customerId);
+    }
+
+    public Optional<Customer> findByUsername(String username) {
+        return customerDao.findByUsername(username);
     }
 }

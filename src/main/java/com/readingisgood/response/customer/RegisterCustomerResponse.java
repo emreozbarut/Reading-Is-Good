@@ -9,4 +9,5 @@ import org.springframework.http.HttpStatus;
 public class RegisterCustomerResponse {
 
     private HttpStatus status;
+    private String bearerToken;
 }
