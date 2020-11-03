@@ -8,6 +8,5 @@ import java.util.List;
 @Data
 public class SaveOrderRequest {
 
-    private Long customerId;
     private List<OrderDetail> orderDetails;
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Controller
@@ -32,13 +33,19 @@ public class OrderController {
 
     @ResponseBody
     @PostMapping("/save")
-    public SaveOrderResponse save(@RequestBody SaveOrderRequest request) {
-        return orderService.save(request);
+    public SaveOrderResponse save(@RequestBody SaveOrderRequest saveOrderRequest, HttpServletRequest request) {
+        return orderService.save(saveOrderRequest, request);
     }
 
     @ResponseBody
     @GetMapping("/getOrders/{customerId}")
     public List<OrderDTO> getOrdersBy(@PathVariable(name = "customerId") Long customerId) {
         return orderService.getOrdersBy(customerId);
+    }
+
+    @ResponseBody
+    @GetMapping("/getCurrentUserOrders")
+    public List<OrderDTO> getCurrentUserOrders(HttpServletRequest request) {
+        return orderService.getCurrentUserOrders(request);
     }
 }

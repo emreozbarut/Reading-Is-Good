@@ -52,12 +52,16 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(getUsername(token));
+    Authentication getAuthentication(String token) {
+        UserDetails userDetails = getCurrentUser(token);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public String getUsername(String token) {
+    public UserDetails getCurrentUser(String token) {
+        return userDetailsService.loadUserByUsername(getUsername(token));
+    }
+
+    private String getUsername(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 

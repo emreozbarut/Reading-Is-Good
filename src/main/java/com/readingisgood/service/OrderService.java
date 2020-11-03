@@ -1,5 +1,6 @@
 package com.readingisgood.service;
 
+import com.readingisgood.configuration.security.jwt.JwtTokenProvider;
 import com.readingisgood.converter.order.OrderDTOConverter;
 import com.readingisgood.dao.OrderDao;
 import com.readingisgood.dto.OrderDTO;
@@ -11,9 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -21,6 +25,9 @@ public class OrderService {
 
     @Autowired
     private OrderDTOConverter converter;
+
+    @Autowired
+    private JwtTokenProvider provider;
 
     private OrderDao orderDao;
     private CustomerService customerService;
@@ -34,8 +41,16 @@ public class OrderService {
         return converter.convertOrdersToDTO(orderDao.findAll());
     }
 
-    public SaveOrderResponse save(SaveOrderRequest request) {
-        List<Orders> orders = converter.convertRequestToOrder(request);
+    public SaveOrderResponse save(SaveOrderRequest saveOrderRequest, HttpServletRequest request) {
+        String token = provider.resolveToken(request);
+        if (StringUtils.isEmpty(token) || !provider.validateToken(token)) {
+            return SaveOrderResponse.builder().status(HttpStatus.BAD_REQUEST).build();
+        }
+        Customer customer = (Customer) provider.getCurrentUser(token);
+        if (Objects.isNull(customer)) {
+            return SaveOrderResponse.builder().status(HttpStatus.BAD_REQUEST).build();
+        }
+        List<Orders> orders = converter.convertRequestToOrder(saveOrderRequest, customer);
         if (CollectionUtils.isEmpty(orders)) {
             return SaveOrderResponse.builder().status(HttpStatus.BAD_REQUEST).build();
         }
@@ -59,5 +74,17 @@ public class OrderService {
             return Collections.emptyList();
         }
         return converter.convertOrdersToDTO(orderDao.getAllByCustomer(customerOptional.get()));
+    }
+
+    public List<OrderDTO> getCurrentUserOrders(HttpServletRequest request) {
+        String token = provider.resolveToken(request);
+        if (StringUtils.isEmpty(token) || !provider.validateToken(token)) {
+            return Collections.emptyList();
+        }
+        Customer customer = (Customer) provider.getCurrentUser(token);
+        if (Objects.isNull(customer)) {
+            return Collections.emptyList();
+        }
+        return converter.convertOrdersToDTO(orderDao.getAllByCustomer(customer));
     }
 }

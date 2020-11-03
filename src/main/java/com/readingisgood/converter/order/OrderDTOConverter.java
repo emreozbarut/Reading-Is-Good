@@ -48,16 +48,15 @@ public class OrderDTOConverter {
                 .collect(Collectors.toList());
     }
 
-    public List<Orders> convertRequestToOrder(SaveOrderRequest request) {
+    public List<Orders> convertRequestToOrder(SaveOrderRequest request, Customer customer) {
         if (CollectionUtils.isEmpty(request.getOrderDetails())) {
             return Collections.emptyList();
         }
         List<Orders> orders = new ArrayList<>();
         for (OrderDetail orderDetail : request.getOrderDetails()) {
-            Optional<Customer> customerOptional = customerService.findById(request.getCustomerId());
             Optional<BookDTO> bookOptional = bookService.findById(orderDetail.getBookId());
-            if (customerOptional.isPresent() && bookOptional.isPresent() && validateAndUpdateSku(bookOptional.get(), orderDetail)) {
-                orders.add(createOrder(customerOptional.get(), bookOptional.get().getId(), orderDetail.getQuantity()));
+            if (bookOptional.isPresent() && validateAndUpdateSku(bookOptional.get(), orderDetail)) {
+                orders.add(createOrder(customer, bookOptional.get().getId(), orderDetail.getQuantity()));
             }
         }
         return orders;
