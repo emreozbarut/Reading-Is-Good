@@ -86,7 +86,7 @@ public class OrderDTOConverter {
     private Orders createOrder(Customer customer, Long bookId, Integer quantity) {
         return Orders.builder()
                 .customer(customer)
-                .book(bookService.findBy(bookId).get())
+                .book(bookService.findBy(bookId).orElseThrow())
                 .quantity(quantity)
                 .build();
     }

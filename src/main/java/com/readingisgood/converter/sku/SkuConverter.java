@@ -15,7 +15,7 @@ public class SkuConverter {
                 .collect(Collectors.toList());
     }
 
-    public SkuDTO convertSkuToDTO(Sku sku) {
+    private SkuDTO convertSkuToDTO(Sku sku) {
         return SkuDTO.builder()
                 .id(sku.getId())
                 .status(sku.getStatus().name())

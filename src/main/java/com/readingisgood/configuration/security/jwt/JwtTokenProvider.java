@@ -44,11 +44,11 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getValidityInMs());
 
-        return Jwts.builder()//
-                .setClaims(claims)//
-                .setIssuedAt(now)//
-                .setExpiration(validity)//
-                .signWith(SignatureAlgorithm.HS256, secretKey)//
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
@@ -68,7 +68,7 @@ public class JwtTokenProvider {
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7, bearerToken.length());
+            return bearerToken.substring(7);
         }
         return null;
     }

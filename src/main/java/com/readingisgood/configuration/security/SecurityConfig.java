@@ -15,6 +15,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private static final String API = "/api/**";
+
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
@@ -35,9 +37,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/auth/signin").permitAll()
                 .antMatchers("/api/customer/register").permitAll()
                 .antMatchers("/api/customer/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.GET, "/api/**").hasRole("USER")
-                .antMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.POST, "/api/**").hasRole("USER")
+                .antMatchers(HttpMethod.GET, API).hasRole("USER")
+                .antMatchers(HttpMethod.DELETE, API).hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, API).hasRole("USER")
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtSecurityConfigurer(jwtTokenProvider));

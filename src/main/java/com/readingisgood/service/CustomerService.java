@@ -50,7 +50,7 @@ public class CustomerService {
         return response;
     }
 
-    public Optional<Customer> findById(Long customerId) {
+    Optional<Customer> findById(Long customerId) {
         return customerDao.findById(customerId);
     }
 

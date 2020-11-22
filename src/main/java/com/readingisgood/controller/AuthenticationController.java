@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -34,14 +33,14 @@ public class AuthenticationController {
     private CustomerService customerService;
 
     @PostMapping("/signin")
-    public ResponseEntity signin(@RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<HashMap<String, String>> signin(@RequestBody AuthenticationRequest authenticationRequest) {
 
         try {
             String username = authenticationRequest.getUsername();
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, authenticationRequest.getPassword()));
             String token = jwtTokenProvider.createToken(username, customerService.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username " + username + "not found")).getRoles());
 
-            Map<Object, Object> model = new HashMap<>();
+            HashMap<String, String> model = new HashMap<>();
             model.put("username", username);
             model.put("token", token);
             return ok(model);
